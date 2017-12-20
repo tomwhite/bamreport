@@ -1,0 +1,66 @@
+package com.cloudera.bamreport;
+
+import htsjdk.samtools.SAMFileHeader;
+import htsjdk.samtools.SAMSequenceDictionary;
+import htsjdk.samtools.SAMSequenceRecord;
+import htsjdk.samtools.SAMTextHeaderCodec;
+import htsjdk.samtools.util.BufferedLineReader;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
+
+// Inspired by Hail's GenomeReference
+public class GenomeReference {
+
+  public static final GenomeReference GRCh37 = new GenomeReference("human_g1k_v37.dict");
+  public static final GenomeReference GRCh38 = new GenomeReference("Homo_sapiens_assembly38.dict");
+
+  private final SAMSequenceDictionary dictionary;
+
+  private GenomeReference(String dictResource) {
+    try {
+      SAMTextHeaderCodec codec = new SAMTextHeaderCodec();
+      String dict = getResourceFileAsString(dictResource);
+      SAMFileHeader header = codec.decode(BufferedLineReader.fromString(dict), getClass().getSimpleName());
+      this.dictionary = header.getSequenceDictionary();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Check if the given sequence dictionary is from this genome reference by comparing
+   * names and contig lengths. If {@code sequenceDictionary} has a sequence with a
+   * different name or length then return {@code false}.
+   * @param sequenceDictionary
+   * @return if the genome reference contains the given sequence dictionary
+   */
+  public boolean contains(SAMSequenceDictionary sequenceDictionary) {
+    for (SAMSequenceRecord seq : sequenceDictionary.getSequences()) {
+      SAMSequenceRecord genomeSequence = dictionary.getSequence(seq.getSequenceName());
+      if (genomeSequence == null || (genomeSequence.getSequenceLength() != seq.getSequenceLength())) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public static String inferReference(SAMSequenceDictionary sequenceDictionary) {
+    if (GenomeReference.GRCh37.contains(sequenceDictionary)) {
+      return "GRCh37";
+    }
+    if (GenomeReference.GRCh38.contains(sequenceDictionary)) {
+      return "GRCh38";
+    }
+    return null;
+  }
+
+  private static String getResourceFileAsString(String resourceFileName) throws IOException {
+    try (InputStream is = GenomeReference.class.getClassLoader().getResourceAsStream(resourceFileName)) {
+      BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+      return reader.lines().collect(Collectors.joining("\n"));
+    }
+  }
+}

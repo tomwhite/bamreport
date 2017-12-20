@@ -1,0 +1,1 @@
+The dict files are from the GATK resource bundle https://software.broadinstitute.org/gatk/download/bundle
