@@ -14,12 +14,19 @@ import java.util.stream.Collectors;
 // Inspired by Hail's GenomeReference
 public class GenomeReference {
 
-  public static final GenomeReference GRCh37 = new GenomeReference("human_g1k_v37.dict");
-  public static final GenomeReference GRCh38 = new GenomeReference("Homo_sapiens_assembly38.dict");
+  public static final GenomeReference GRCh37 = new GenomeReference("GRCh37", "human_g1k_v37.dict");
+  public static final GenomeReference GRCh38 = new GenomeReference("GRCh38", "Homo_sapiens_assembly38.dict");
 
+  private static final GenomeReference[] WELL_KNOWN_GENOMES = new GenomeReference[] {
+      GRCh37,
+      GRCh38
+  };
+
+  private final String name;
   private final SAMSequenceDictionary dictionary;
 
-  private GenomeReference(String dictResource) {
+  private GenomeReference(String name, String dictResource) {
+    this.name = name;
     try {
       SAMTextHeaderCodec codec = new SAMTextHeaderCodec();
       String dict = getResourceFileAsString(dictResource);
@@ -28,6 +35,14 @@ public class GenomeReference {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public int getLength(String contig) {
+    return dictionary.getSequence(contig).getSequenceLength();
   }
 
   /**
@@ -47,12 +62,11 @@ public class GenomeReference {
     return true;
   }
 
-  public static String inferReference(SAMSequenceDictionary sequenceDictionary) {
-    if (GenomeReference.GRCh37.contains(sequenceDictionary)) {
-      return "GRCh37";
-    }
-    if (GenomeReference.GRCh38.contains(sequenceDictionary)) {
-      return "GRCh38";
+  public static GenomeReference inferReference(SAMSequenceDictionary sequenceDictionary) {
+    for (GenomeReference genomeReference : WELL_KNOWN_GENOMES) {
+      if (genomeReference.contains(sequenceDictionary)) {
+        return genomeReference;
+      }
     }
     return null;
   }

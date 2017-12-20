@@ -54,11 +54,11 @@ public class BamReport {
     if (sequenceDictionary.size() == 0) {
       System.out.println("No sequence dictionary");
     } else {
-      String inferredRef = GenomeReference.inferReference(sequenceDictionary);
+      GenomeReference inferredRef = GenomeReference.inferReference(sequenceDictionary);
       if (inferredRef == null) {
         System.out.println("Sequence dictionary:");
       } else {
-        System.out.printf("Sequence dictionary (%s inferred):\n", inferredRef);
+        System.out.printf("Sequence dictionary (%s inferred):\n", inferredRef.getName());
       }
       for (SAMSequenceRecord seq : sequenceDictionary.getSequences()) {
         System.out.printf("\tSN: %s, LN: %s\n", seq.getSequenceName(), seq.getSequenceLength());

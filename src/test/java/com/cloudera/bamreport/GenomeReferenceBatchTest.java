@@ -23,16 +23,16 @@ public class GenomeReferenceBatchTest {
       try (SamReader reader = SamReaderFactory.makeDefault().open(new File(filename))) {
         SAMFileHeader header = reader.getFileHeader();
         SAMSequenceDictionary sequenceDictionary = header.getSequenceDictionary();
-        String ref = GenomeReference.inferReference(sequenceDictionary);
+        GenomeReference ref = GenomeReference.inferReference(sequenceDictionary);
         if (ref == null) {
           norefCount++;
           System.out.println("?," + filename);
-        } else if (ref.equals("GRCh37")) {
+        } else if (ref.getName().equals("GRCh37")) {
           grch37Count++;
-          System.out.println(ref + "," + filename);
-        } else if (ref.equals("GRCh38")) {
+          System.out.println(ref.getName() + "," + filename);
+        } else if (ref.getName().equals("GRCh38")) {
           grch38Count++;
-          System.out.println(ref + "," + filename);
+          System.out.println(ref.getName() + "," + filename);
         }
         totalCount++;
       }

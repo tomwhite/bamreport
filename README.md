@@ -26,3 +26,11 @@ mvn exec:java  -Dexec.mainClass=com.cloudera.bamreport.BamReport -Dexec.args="/U
 # unmapped BAM
 mvn exec:java  -Dexec.mainClass=com.cloudera.bamreport.BamReport -Dexec.args="/Users/tom/workspace/gatk/src/test/resources/org/broadinstitute/hellbender/metrics/analysis/QualityScoreDistribution/unmapped.bam"
 ```
+
+Sparklines
+
+```bash
+mvn compile
+mvn -q exec:java  -Dexec.mainClass=com.cloudera.bamreport.BamCoverageSparkline -Dexec.args="/Users/tom/workspace/gatk/src/test/resources/large/CEUTrio.HiSeq.WGS.b37.NA12878.20.21.bam" > counts.txt
+open sparkline.html
+```
