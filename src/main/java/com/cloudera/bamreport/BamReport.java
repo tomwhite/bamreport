@@ -15,7 +15,6 @@ import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,10 +51,11 @@ public class BamReport {
     System.out.printf("Sort order: %s\n", sortOrder);
 
     SAMSequenceDictionary sequenceDictionary = header.getSequenceDictionary();
+    GenomeReference inferredRef = null;
     if (sequenceDictionary.size() == 0) {
       System.out.println("No sequence dictionary");
     } else {
-      GenomeReference inferredRef = GenomeReference.inferReference(sequenceDictionary);
+      inferredRef = GenomeReference.inferReference(sequenceDictionary);
       if (inferredRef == null) {
         System.out.println("Sequence dictionary:");
       } else {
@@ -86,13 +86,15 @@ public class BamReport {
       }
       System.out.printf("\tRead-Length: %s\n", firstRead.getReadLength());
 
-      System.out.println("Coverage:");
-      Map<String, int[]> contigToBinCounts = BamCoverage.calculateCoverage(bamPath, 2500000); // so chr1 fits in 100 chars
-      int maxCount = BamCoverage.maxCount(contigToBinCounts);
-      for (Map.Entry<String, int[]> entry : contigToBinCounts.entrySet()) {
-        String contig = entry.getKey();
-        int[] bins = entry.getValue();
-        System.out.printf("\t%s: %s\n", contig, AsciiSpark.asciiGraph(bins, maxCount));
+      if (sortOrder == SAMFileHeader.SortOrder.coordinate && inferredRef != null) {
+        System.out.println("Coverage:");
+        Map<String, int[]> contigToBinCounts = BamCoverage.calculateCoverage(bamPath, 2500000); // so chr1 fits in 100 chars
+        int maxCount = BamCoverage.maxCount(contigToBinCounts);
+        for (Map.Entry<String, int[]> entry : contigToBinCounts.entrySet()) {
+          String contig = entry.getKey();
+          int[] bins = entry.getValue();
+          System.out.printf("\t%s: %s\n", contig, AsciiSpark.asciiGraph(bins, maxCount));
+        }
       }
     } else {
       System.out.println("No reads");
