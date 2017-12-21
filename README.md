@@ -31,6 +31,6 @@ Sparklines
 
 ```bash
 mvn compile
-mvn -q exec:java  -Dexec.mainClass=com.cloudera.bamreport.BamCoverageSparkline -Dexec.args="/Users/tom/workspace/gatk/src/test/resources/large/CEUTrio.HiSeq.WGS.b37.NA12878.20.21.bam" > counts.txt
+mvn -q exec:java  -Dexec.mainClass=com.cloudera.bamreport.BamCoverageSparkline -Dexec.args="/Users/tom/workspace/gatk/src/test/resources/large/CEUTrio.HiSeq.WGS.b37.NA12878.20.21.bam" > sparkline.html
 open sparkline.html
 ```
