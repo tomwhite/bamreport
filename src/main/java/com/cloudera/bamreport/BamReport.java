@@ -3,7 +3,6 @@ package com.cloudera.bamreport;
 import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMReadGroupRecord;
 import htsjdk.samtools.SAMRecord;
-import htsjdk.samtools.SAMRecordFactory;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;
@@ -16,8 +15,10 @@ import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BamReport {
 
@@ -79,14 +80,22 @@ public class BamReport {
       if (firstRead.getReadUnmappedFlag()) {
         System.out.printf("\tRead unmapped\n");
       } else {
+        System.out.printf("\tContig: %s\n", firstRead.getContig());
         System.out.printf("\tStart: %s\n", firstRead.getAlignmentStart());
         System.out.printf("\tEnd: %s\n", firstRead.getAlignmentEnd());
       }
       System.out.printf("\tRead-Length: %s\n", firstRead.getReadLength());
+
+      System.out.println("Coverage:");
+      Map<String, int[]> contigToBinCounts = BamCoverage.calculateCoverage(bamPath, 2500000); // so chr1 fits in 100 chars
+      int maxCount = BamCoverage.maxCount(contigToBinCounts);
+      for (Map.Entry<String, int[]> entry : contigToBinCounts.entrySet()) {
+        String contig = entry.getKey();
+        int[] bins = entry.getValue();
+        System.out.printf("\t%s: %s\n", contig, AsciiSpark.asciiGraph(bins, maxCount));
+      }
     } else {
       System.out.println("No reads");
     }
   }
-
-
 }
